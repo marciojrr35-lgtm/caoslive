@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CAOSLIVE! — Comunidade</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <a class="logo" href="#">CAOS<span>LIVE!</span></a>
+  <nav><a href="#inicio">Início</a><a href="#recordacoes">Recordações</a><button id="newPostTop">+ Postar</button></nav>
+</header>
+
+<main>
+<section class="cover" id="inicio">
+  <div class="coverText"><small>COMUNIDADE CAOSLIVE!</small><h1>Onde o caos<br><span>vira história.</span></h1><p>Compartilhe momentos, fotos, novidades e recordações com a comunidade.</p></div>
+  <div class="mark">C<span>L!</span></div>
+</section>
+
+<section class="layout">
+  <aside>
+    <div class="profile"><div class="avatar">CL</div><b>CAOSLIVE!</b><small>Comunidade oficial</small></div>
+    <button class="side active">🏠 Início</button>
+    <button class="side" onclick="document.getElementById('recordacoes').scrollIntoView()">🕘 Recordações</button>
+    <button class="side" id="newPostSide">✚ Nova postagem</button>
+    <div class="tip"><b>MEMÓRIAS</b><p>Guarde os melhores momentos da comunidade e encontre tudo depois.</p></div>
+  </aside>
+
+  <section class="feed">
+    <div class="composer" id="composer">
+      <div class="mini">CL</div>
+      <div><b>Compartilhe alguma coisa...</b><small>Crie uma postagem para a comunidade.</small></div>
+      <button id="newPost">CRIAR POST</button>
+    </div>
+    <div id="posts"></div>
+  </section>
+</section>
+
+<section id="recordacoes" class="memories">
+  <div class="sectionTitle"><div><small>ARQUIVO DA COMUNIDADE</small><h2>Recordações</h2></div><span>Momentos salvos</span></div>
+  <div id="memoryGrid" class="memoryGrid"></div>
+</section>
+</main>
+
+<div class="modal" id="modal">
+ <div class="modalBox">
+  <button class="close" id="close">×</button>
+  <small>NOVA POSTAGEM</small><h2>O que aconteceu?</h2>
+  <input id="author" maxlength="30" placeholder="Seu nome">
+  <textarea id="text" maxlength="500" placeholder="Escreva sua postagem..."></textarea>
+  <input id="image" type="url" placeholder="Link de uma imagem (opcional)">
+  <label class="remember"><input id="remember" type="checkbox" checked> Salvar também em Recordações</label>
+  <button class="publish" id="publish">PUBLICAR</button>
+ </div>
+</div>
+<footer>CAOSLIVE! © 2026 · Comunidade</footer>
+<script src="app.js"></script>
+</body></html>
