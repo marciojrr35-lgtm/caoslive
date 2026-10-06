@@ -1,129 +1,155 @@
-const socket = io();
-const roomInput = document.getElementById("room");
-const joinBtn = document.getElementById("join");
-const startBtn = document.getElementById("start");
-const stopBtn = document.getElementById("stop");
-const copyBtn = document.getElementById("copy");
-const video = document.getElementById("video");
-const empty = document.getElementById("empty");
-const status = document.getElementById("status");
-const live = document.getElementById("live");
-const hint = document.getElementById("hint");
-const roomInfo = document.getElementById("roomInfo");
-const roomLabel = document.getElementById("roomLabel");
-const viewersEl = document.getElementById("viewers");
+document.addEventListener("DOMContentLoaded", () => {
+  const postBtn = document.getElementById("createPostBtn");
+  const modal = document.getElementById("postModal");
+  const closeBtn = document.getElementById("closeModal");
+  const form = document.getElementById("postForm");
+  const feed = document.getElementById("feed");
 
-let room = new URLSearchParams(location.search).get("room") || "";
-roomInput.value = room;
-let role = "viewer";
-let stream = null;
-let peers = new Map();
-let viewerCount = 0;
-const pcConfig = { iceServers: [{urls:"stun:stun.l.google.com:19302"}] };
-
-function setRoom(r){
-  room = r.trim();
-  if(!room) return alert("Digite o nome da sala.");
-  history.replaceState({}, "", `?room=${encodeURIComponent(room)}`);
-  roomInfo.textContent = room;
-  roomLabel.textContent = " · " + room;
-}
-function joined(){
-  status.textContent = "● CONECTADO";
-  status.style.color = "#fff";
-  hint.textContent = `Sala "${room}" conectada.`;
-}
-joinBtn.onclick = () => {
-  setRoom(roomInput.value);
-  socket.emit("join-room", {room, role:"viewer"});
-};
-startBtn.onclick = async () => {
-  if(!room) setRoom(roomInput.value || "caoslive");
-  try{
-    stream = await navigator.mediaDevices.getDisplayMedia({video:true,audio:true});
-    role = "broadcaster";
-    socket.emit("join-room", {room, role});
-    video.srcObject = stream; video.style.display = "block"; empty.style.display = "none";
-    startBtn.disabled = true; stopBtn.disabled = false; joinBtn.disabled = true;
-    live.textContent = "● AO VIVO"; live.style.color = "#fff";
-    status.textContent = "● TRANSMITINDO"; status.style.color = "#fff";
-    stream.getVideoTracks()[0].addEventListener("ended", stopStream);
-  }catch(e){ alert("Não foi possível iniciar a captura da tela. Verifique a permissão do navegador."); }
-};
-stopBtn.onclick = stopStream;
-function stopStream(){
-  if(stream) stream.getTracks().forEach(t=>t.stop());
-  stream = null;
-  peers.forEach(pc=>pc.close()); peers.clear();
-  startBtn.disabled = false; stopBtn.disabled = true; joinBtn.disabled = false;
-  video.srcObject = null; video.style.display = "none"; empty.style.display = "block";
-  live.textContent = "ENCERRADA"; live.style.color = "#999";
-  status.textContent = "● OFFLINE"; status.style.color = "#999";
-  socket.disconnect(); setTimeout(()=>location.reload(),100);
-}
-copyBtn.onclick = async () => {
-  if(!room) setRoom(roomInput.value || "caoslive");
-  const url = `${location.origin}${location.pathname}?room=${encodeURIComponent(room)}`;
-  await navigator.clipboard.writeText(url);
-  copyBtn.textContent = "LINK COPIADO ✓";
-  setTimeout(()=>copyBtn.textContent="COPIAR LINK DA SALA",1800);
-};
-
-socket.on("room-joined", data => {
-  joined();
-  if(data.broadcasterOnline) live.textContent = "● AO VIVO";
-});
-socket.on("broadcaster-online", ()=>{ live.textContent="● AO VIVO"; });
-socket.on("viewer-joined", async ({viewerId}) => {
-  if(!stream) return;
-  const pc = new RTCPeerConnection(pcConfig);
-  peers.set(viewerId, pc);
-  stream.getTracks().forEach(track=>pc.addTrack(track, stream));
-  pc.onicecandidate = e => { if(e.candidate) socket.emit("ice-candidate",{targetId:viewerId,candidate:e.candidate}); };
-  const offer = await pc.createOffer();
-  await pc.setLocalDescription(offer);
-  socket.emit("offer",{viewerId,offer});
-  viewerCount++; viewersEl.textContent = viewerCount;
-});
-socket.on("answer", async ({viewerId,answer}) => {
-  const pc = peers.get(viewerId);
-  if(pc) await pc.setRemoteDescription(answer);
-});
-socket.on("viewer-left", ({viewerId}) => {
-  const pc=peers.get(viewerId); if(pc) pc.close(); peers.delete(viewerId);
-  viewerCount=Math.max(0,viewerCount-1); viewersEl.textContent=viewerCount;
-});
-let viewerPC = null; let broadcasterId = null;
-socket.on("offer", async ({offer, broadcasterId: bid}) => { broadcasterId = bid;
-  if(role === "broadcaster") return;
-  viewerPC = new RTCPeerConnection(pcConfig);
-  viewerPC.ontrack = e => {
-    video.srcObject=e.streams[0]; video.style.display="block"; empty.style.display="none";
-    live.textContent="● AO VIVO"; live.style.color="#fff";
-  };
-  viewerPC.onicecandidate = e => { if(e.candidate) socket.emit("ice-candidate",{targetId: broadcasterId ,candidate:e.candidate}); };
-  await viewerPC.setRemoteDescription(offer);
-  const answer=await viewerPC.createAnswer();
-  await viewerPC.setLocalDescription(answer);
-  // The signaling server identifies the sender as the broadcaster through socket.data.
-  // Send the answer to the broadcaster using the socket event's target encoded by server.
-  socket.emit("answer",{broadcasterId,answer});
-});
-socket.on("ice-candidate", async ({fromId,candidate}) => {
-  if(role === "broadcaster"){
-    const pc=peers.get(fromId); if(pc) await pc.addIceCandidate(candidate).catch(()=>{});
-  } else if(viewerPC){
-    await viewerPC.addIceCandidate(candidate).catch(()=>{});
+  if (!postBtn || !modal || !form || !feed) {
+    console.error("Elementos da postagem não encontrados.");
+    return;
   }
-});
-socket.on("stream-ended", ()=>{
-  if(role !== "broadcaster"){
-    video.srcObject=null; video.style.display="none"; empty.style.display="block";
-    live.textContent="ENCERRADA"; live.style.color="#999";
+
+  postBtn.addEventListener("click", () => {
+    modal.classList.add("active");
+  });
+
+  if (closeBtn) {
+    closeBtn.addEventListener("click", () => {
+      modal.classList.remove("active");
+    });
   }
+
+  modal.addEventListener("click", (event) => {
+    if (event.target === modal) {
+      modal.classList.remove("active");
+    }
+  });
+
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    const name = document.getElementById("author")?.value.trim() || "Anônimo";
+    const text = document.getElementById("postText")?.value.trim() || "";
+    const image = document.getElementById("imageUrl")?.value.trim() || "";
+
+    if (!text) {
+      alert("Escreva alguma coisa antes de publicar!");
+      return;
+    }
+
+    const post = {
+      id: Date.now(),
+      name,
+      text,
+      image,
+      date: new Date().toLocaleString("pt-BR")
+    };
+
+    const posts = JSON.parse(localStorage.getItem("caoslive_posts") || "[]");
+    posts.unshift(post);
+    localStorage.setItem("caoslive_posts", JSON.stringify(posts));
+
+    form.reset();
+    modal.classList.remove("active");
+    renderPosts();
+  });
+
+  function renderPosts() {
+    const posts = JSON.parse(
+      localStorage.getItem("caoslive_posts") || "[]"
+    );
+
+    feed.innerHTML = "";
+
+    if (posts.length === 0) {
+      feed.innerHTML = `
+        <div class="empty">
+          <h3>Nenhuma postagem ainda</h3>
+          <p>Seja o primeiro a publicar no CAOSLIVE!</p>
+        </div>
+      `;
+      return;
+    }
+
+    posts.forEach((post) => {
+      const article = document.createElement("article");
+      article.className = "post";
+
+      article.innerHTML = `
+        <div class="post-header">
+          <strong>${escapeHTML(post.name)}</strong>
+          <small>${post.date}</small>
+        </div>
+
+        <p>${escapeHTML(post.text)}</p>
+
+        ${
+          post.image
+            ? `<img src="${escapeAttribute(post.image)}" class="post-image" alt="Imagem da postagem">`
+            : ""
+        }
+
+        <div class="post-actions">
+          <button class="memory-btn" data-id="${post.id}">
+            ❤️ Recordação
+          </button>
+
+          <button class="delete-btn" data-id="${post.id}">
+            🗑️ Apagar
+          </button>
+        </div>
+      `;
+
+      feed.appendChild(article);
+    });
+  }
+
+  feed.addEventListener("click", (event) => {
+    const button = event.target.closest("button");
+    if (!button) return;
+
+    const id = Number(button.dataset.id);
+    const posts = JSON.parse(
+      localStorage.getItem("caoslive_posts") || "[]"
+    );
+
+    if (button.classList.contains("delete-btn")) {
+      const updated = posts.filter((post) => post.id !== id);
+      localStorage.setItem("caoslive_posts", JSON.stringify(updated));
+      renderPosts();
+    }
+
+    if (button.classList.contains("memory-btn")) {
+      const post = posts.find((post) => post.id === id);
+      if (!post) return;
+
+      const memories = JSON.parse(
+        localStorage.getItem("caoslive_memories") || "[]"
+      );
+
+      if (!memories.some((item) => item.id === id)) {
+        memories.unshift(post);
+        localStorage.setItem(
+          "caoslive_memories",
+          JSON.stringify(memories)
+        );
+        button.textContent = "💾 Salvo!";
+      } else {
+        button.textContent = "❤️ Já salvo";
+      }
+    }
+  });
+
+  function escapeHTML(text) {
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  function escapeAttribute(text) {
+    return text.replace(/"/g, "&quot;");
+  }
+
+  renderPosts();
 });
-if(room) {
-  setRoom(room);
-  // Automatically joins as viewer.
-  socket.emit("join-room",{room,role:"viewer"});
-}
