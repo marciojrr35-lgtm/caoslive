@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>CAOSLIVE! — Transmissão</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<header>
+  <b>CAOS<span>LIVE!</span></b>
+  <i id="status">● OFFLINE</i>
+</header>
+
+<main>
+  <section class="hero">
+    <h1>TRANSMISSÃO AO VIVO</h1>
+    <p>Compartilhe sua tela e envie o link para quem quiser assistir.</p>
+  </section>
+
+  <section class="card" id="setup">
+    <label>CÓDIGO DA SALA</label>
+
+    <div class="row">
+      <input id="room" maxlength="20">
+      <button id="copyRoom">COPIAR LINK</button>
+    </div>
+
+    <div class="actions">
+      <button id="start">🔴 INICIAR TRANSMISSÃO</button>
+      <button id="watch">👁️ ENTRAR COMO ESPECTADOR</button>
+    </div>
+
+    <small>Use Chrome/Edge e HTTPS para compartilhar a tela.</small>
+  </section>
+
+  <section class="card hidden" id="live">
+    <div class="bar">
+      <b>🔴 AO VIVO</b>
+      <span id="roomLabel"></span>
+    </div>
+
+    <video id="video" autoplay playsinline controls></video>
+
+    <button id="share">🔗 COPIAR LINK DA SALA</button>
+    <button id="stop">⏹ ENCERRAR</button>
+  </section>
+
+  <section class="card hidden" id="viewer">
+    <div class="bar">
+      <b>🔴 AO VIVO</b>
+      <span id="viewerRoom"></span>
+    </div>
+
+    <video id="viewerVideo" autoplay playsinline controls></video>
+
+    <p id="viewerMsg">Conectando...</p>
+  </section>
+</main>
+
+<footer>
+  CAOSLIVE! • Transmissão em tempo real
+</footer>
+
+<script src="/app.js"></script>
+
+</body>
+</html>
