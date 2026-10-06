@@ -1,58 +1,77 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>CAOSLIVE! — Comunidade</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CAOSLIVE!</title>
+  <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-<header>
-  <a class="logo" href="#">CAOS<span>LIVE!</span></a>
-  <nav><a href="#inicio">Início</a><a href="#recordacoes">Recordações</a><button id="newPostTop">+ Postar</button></nav>
-</header>
 
-<main>
-<section class="cover" id="inicio">
-  <div class="coverText"><small>COMUNIDADE CAOSLIVE!</small><h1>Onde o caos<br><span>vira história.</span></h1><p>Compartilhe momentos, fotos, novidades e recordações com a comunidade.</p></div>
-  <div class="mark">C<span>L!</span></div>
-</section>
+  <header class="topo">
+    <div class="logo">CAOS<span>LIVE!</span></div>
 
-<section class="layout">
-  <aside>
-    <div class="profile"><div class="avatar">CL</div><b>CAOSLIVE!</b><small>Comunidade oficial</small></div>
-    <button class="side active">🏠 Início</button>
-    <button class="side" onclick="document.getElementById('recordacoes').scrollIntoView()">🕘 Recordações</button>
-    <button class="side" id="newPostSide">✚ Nova postagem</button>
-    <div class="tip"><b>MEMÓRIAS</b><p>Guarde os melhores momentos da comunidade e encontre tudo depois.</p></div>
-  </aside>
+    <nav>
+      <button onclick="window.scrollTo({top:0,behavior:'smooth'})">
+        Início
+      </button>
 
-  <section class="feed">
-    <div class="composer" id="composer">
-      <div class="mini">CL</div>
-      <div><b>Compartilhe alguma coisa...</b><small>Crie uma postagem para a comunidade.</small></div>
-      <button id="newPost">CRIAR POST</button>
-    </div>
-    <div id="posts"></div>
-  </section>
-</section>
+      <button onclick="mostrarMemorias()">
+        Recordações
+      </button>
 
-<section id="recordacoes" class="memories">
-  <div class="sectionTitle"><div><small>ARQUIVO DA COMUNIDADE</small><h2>Recordações</h2></div><span>Momentos salvos</span></div>
-  <div id="memoryGrid" class="memoryGrid"></div>
-</section>
-</main>
+      <button id="createPostBtn" class="btn-postar">
+        + Criar postagem
+      </button>
+    </nav>
+  </header>
 
-<div class="modal" id="modal">
- <div class="modalBox">
-  <button class="close" id="close">×</button>
-  <small>NOVA POSTAGEM</small><h2>O que aconteceu?</h2>
-  <input id="author" maxlength="30" placeholder="Seu nome">
-  <textarea id="text" maxlength="500" placeholder="Escreva sua postagem..."></textarea>
-  <input id="image" type="url" placeholder="Link de uma imagem (opcional)">
-  <label class="remember"><input id="remember" type="checkbox" checked> Salvar também em Recordações</label>
-  <button class="publish" id="publish">PUBLICAR</button>
- </div>
-</div>
-<footer>CAOSLIVE! © 2026 · Comunidade</footer>
-<script src="app.js"></script>
-</body></html>
+  <main>
+
+    <section class="hero">
+      <h1>CAOSLIVE!</h1>
+      <p>Compartilhe seus momentos, histórias e recordações.</p>
+
+      <button id="createPostBtn2" class="btn-principal">
+        Criar postagem
+      </button>
+    </section>
+
+    <section class="conteudo">
+      <h2>Postagens</h2>
+
+      <div id="feed" class="feed"></div>
+
+      <div id="sem-postagens" class="sem-postagens">
+        <h3>Nenhuma postagem ainda</h3>
+        <p>Seja o primeiro a publicar alguma coisa!</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL DE POSTAGEM -->
+  <div id="postModal" class="modal">
+    <div class="modal-caixa">
+
+      <button id="closeModal" class="fechar">×</button>
+
+      <h2>Criar postagem</h2>
+
+      <form id="postForm">
+
+        <label>Seu nome</label>
+        <input
+          type="text"
+          id="author"
+          placeholder="Digite seu nome"
+          required
+        >
+
+        <label>Mensagem</label>
+        <textarea
+          id="postText"
+          placeholder="O que você quer compartilhar?"
+          required
+        ></
